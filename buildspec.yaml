@@ -1,0 +1,34 @@
+#https://docs.aws.amazon.com/codebuild/latest/userguide/getting-started-cli-create-build-spec.html
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+  pre_build:
+    commands:
+      - echo check if AWS CLI is installeds
+      - aws --version
+      - echo check if python is installed
+      - python --version
+      - echo check if pip3 is installed and working
+      - pip3 --version
+      - echo  install cfn-lint 
+      - pip3 install cfn-lint
+      - echo  check if cfn-lint is installed
+      - cfn-lint --version
+      
+  build:
+    commands:
+      - echo validating cfn-lint
+      - cfn-lint Fourstagepipelinetemplate.yaml
+      - echo cfn template Build started on `date`
+      - aws cloudformation package --template-file Fourstagepipelinetemplate.yaml --s3-bucket devopsbucketclo  --output-template-file ClovisoutputTemplate.yaml
+      #aws cloudformation deploy --template-file /home/ec2-user/ClovisoutputTemplate.yaml --stack-name <YOUR STACK NAME>
+  post_build:
+    commands:
+      - echo Build completed on `date`
+artifacts:
+  files:
+    - ClovisoutputTemplate.yaml
+    - Fourstagepipelinetemplate.yaml
